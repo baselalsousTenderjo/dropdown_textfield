@@ -10,7 +10,6 @@ class SingleSelection extends StatefulWidget {
       required this.height,
       required this.enableSearch,
       required this.searchHeight,
-      this.searchTextStyle,
       required this.searchFocusNode,
       required this.mainFocusNode,
       this.searchKeyboardType,
@@ -20,6 +19,7 @@ class SingleSelection extends StatefulWidget {
       required this.autoSort,
       required this.listTileHeight,
       this.onSearchTap,
+      this.align,
       this.onSearchSubmit,
       this.listTextStyle,
       this.searchDecoration,
@@ -28,11 +28,11 @@ class SingleSelection extends StatefulWidget {
       : super(key: key);
   final List<DropDownValueModel> dropDownList;
   final ValueSetter onChanged;
+  final AlignmentGeometry? align;
   final double height;
   final double listTileHeight;
   final bool enableSearch;
   final double searchHeight;
-  final TextStyle? searchTextStyle;
   final FocusNode searchFocusNode;
   final FocusNode mainFocusNode;
   final TextInputType? searchKeyboardType;
@@ -56,6 +56,7 @@ class _SingleSelectionState extends State<SingleSelection> {
   late TextEditingController _searchCnt;
   late FocusScopeNode _focusScopeNode;
   late InputDecoration _inpDec;
+
   onItemChanged(String value) {
     setState(() {
       if (value.isEmpty) {
@@ -107,7 +108,6 @@ class _SingleSelectionState extends State<SingleSelection> {
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextField(
-                style: widget.searchTextStyle,
                 focusNode: widget.searchFocusNode,
                 showCursor: widget.searchShowCursor,
                 keyboardType: widget.searchKeyboardType,
@@ -149,24 +149,32 @@ class _SingleSelectionState extends State<SingleSelection> {
         SizedBox(
           height: widget.height,
           child: Scrollbar(
-            child: ListView.builder(
+            child: ListView.separated(
               padding: EdgeInsets.zero,
               itemCount: newDropDownList.length,
+              separatorBuilder: (context, index) => Divider(
+                color: Colors.grey.withOpacity(0.5),
+              ),
               itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                  height: widget.listTileHeight,
-                  child: Padding(
+                return InkWell(
+                  onTap: () {
+                    widget.onChanged(newDropDownList[index]);
+                  },
+                  child: Container(
+                    width: double.infinity,
                     padding: EdgeInsets.only(
-                        right: 10,
                         left: 10,
+                        right: 10,
                         bottom: widget.listPadding.bottom,
                         top: widget.listPadding.top),
-                    child: InkWell(
-                        onTap: () {
-                          widget.onChanged(newDropDownList[index]);
-                        },
+                    child: Align(
+                      alignment: widget.align ?? Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.fitHeight,
                         child: Text(newDropDownList[index].name,
-                            style: widget.listTextStyle)),
+                            style: widget.listTextStyle),
+                      ),
+                    ),
                   ),
                 );
               },
